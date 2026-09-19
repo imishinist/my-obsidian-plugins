@@ -1,0 +1,11 @@
+{
+  "name": "@my-obsidian-plugins/capture",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "node esbuild.config.mjs production",
+    "check": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  }
+}

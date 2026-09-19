@@ -1,0 +1,233 @@
+.markdown-capture-page {
+  box-sizing: border-box;
+  margin: 0 auto;
+  max-width: 58rem;
+  min-height: 100%;
+  padding: clamp(1.25rem, 4vw, 3.5rem);
+}
+
+.markdown-capture-header {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.markdown-capture-header h2 {
+  font-size: 2rem;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.markdown-capture-daily-note {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+
+.markdown-capture-composer {
+  background: var(--background-primary-alt);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-s);
+  padding: 1.25rem;
+}
+
+.markdown-capture-label,
+.markdown-capture-section-label {
+  color: var(--text-muted);
+  display: block;
+  font-size: var(--font-ui-smaller);
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.02em;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.markdown-capture-input {
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 10px;
+  box-sizing: border-box;
+  min-height: 7.5rem;
+  overflow: hidden;
+  width: 100%;
+  cursor: text;
+}
+
+.markdown-capture-input:focus-within {
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--interactive-accent) 22%, transparent);
+}
+
+.markdown-capture-input .cm-editor {
+  cursor: text;
+  min-height: 7.5rem;
+}
+
+.markdown-capture-input .cm-editor.cm-focused {
+  outline: none;
+}
+
+.markdown-capture-input .cm-scroller {
+  cursor: text;
+  max-height: 18rem;
+  overflow: auto;
+}
+
+.markdown-capture-input .cm-content {
+  min-height: 7.5rem;
+  padding: 0.75rem 1rem 1rem !important;
+}
+
+.markdown-capture-input .cm-line {
+  padding-inline: 0;
+}
+
+.markdown-capture-task-options {
+  border-top: 1px solid var(--background-modifier-border);
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+.markdown-capture-dates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.markdown-capture-dates label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+}
+
+.markdown-capture-dates input {
+  width: 100%;
+}
+
+.markdown-capture-footer {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-top: 1.25rem;
+}
+
+.markdown-capture-shortcuts {
+  align-items: center;
+  color: var(--text-faint);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: var(--font-ui-smaller);
+  gap: 0.4rem;
+}
+
+.markdown-capture-shortcuts kbd {
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  color: var(--text-muted);
+  font-family: var(--font-interface);
+  padding: 0.15rem 0.4rem;
+}
+
+.markdown-capture-send {
+  min-width: 6rem;
+}
+
+.markdown-capture-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.markdown-capture-send-task {
+  min-width: 5rem;
+}
+
+.markdown-capture-timeline {
+  margin-top: 1.5rem;
+}
+
+.markdown-capture-timeline-header {
+  align-items: baseline;
+  border-bottom: 1px solid var(--background-modifier-border);
+  display: flex;
+  padding-bottom: 0.5rem;
+}
+
+.markdown-capture-timeline-header h3 {
+  font-size: var(--font-ui-medium);
+  margin: 0;
+}
+
+.markdown-capture-timeline-list {
+  position: relative;
+}
+
+.markdown-capture-timeline-item {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 3.5rem minmax(0, 1fr);
+  padding: 0.85rem 0;
+}
+
+.markdown-capture-timeline-item:hover {
+  background: var(--background-modifier-hover);
+}
+
+.markdown-capture-timeline-item + .markdown-capture-timeline-item {
+  border-top: 1px solid var(--background-modifier-border-hover);
+}
+
+.markdown-capture-timeline-time {
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+  font-variant-numeric: tabular-nums;
+  padding-top: 0.15rem;
+}
+
+.markdown-capture-timeline-body > :first-child {
+  margin-top: 0;
+}
+
+.markdown-capture-timeline-body > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-capture-empty {
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+  padding: 1rem 0;
+}
+
+@media (max-width: 520px) {
+  .markdown-capture-page {
+    padding: 1rem;
+  }
+
+  .markdown-capture-dates {
+    grid-template-columns: 1fr;
+  }
+
+  .markdown-capture-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .markdown-capture-send {
+    flex: 1;
+  }
+
+  .markdown-capture-actions {
+    width: 100%;
+  }
+
+  .markdown-capture-send-task {
+    flex: 1;
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "id": "markdown-capture",
+  "name": "Markdown Capture",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Capture notes and Task Board-compatible tasks into Markdown.",
+  "author": "taisuke",
+  "isDesktopOnly": false
+}

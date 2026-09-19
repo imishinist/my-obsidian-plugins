@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.js
+*.js.map
+!esbuild.config.mjs
+.DS_Store
+graphify-out/
+.serena/
+**/data.json
+**/.vite/
