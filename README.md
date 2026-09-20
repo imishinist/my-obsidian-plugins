@@ -2,14 +2,39 @@
 
 Obsidianプラグインをまとめて開発するnpm workspacesのmonorepoです。
 
+各プラグインは独立したバージョンとリリースを持ちます。リリースタグ、配布ZIP、展開後のディレクトリ名には、各プラグインのIDを使用します。
+
+## プラグイン
+
+| プラグイン | ID | ソース | バージョン | 概要 |
+| --- | --- | --- | --- | --- |
+| Markdown Capture | `markdown-capture` | `plugins/capture/` | `0.1.1` | Daily Noteへメモやタスクをすばやく追記し、その日のCaptureをタイムラインで確認します。 |
+
+## インストール
+
+1. [Releases](https://github.com/imishinist/my-obsidian-plugins/releases)から、対象プラグインのZIPをダウンロードします。
+2. ZIPを展開します。
+3. 展開されたプラグインディレクトリを、Vaultの`.obsidian/plugins/`へコピーします。
+4. Obsidianを再起動し、**設定 → コミュニティプラグイン**からプラグインを有効化します。
+
+Markdown Captureの場合は、`markdown-capture-vX.Y.Z.zip`を展開すると次の構成になります。
+
+```text
+markdown-capture/
+├── main.js
+├── manifest.json
+└── styles.css
+```
+
 ## Markdown Capture
 
-Daily Noteへメモやタスクをすばやく追記し、その日のCaptureをタイムラインで確認できるプラグインです。Markdownを唯一のSource of Truthとして扱います。
+Markdownを唯一のSource of Truthとして、Obsidian標準のDaily NotesへCaptureを保存します。
 
 ### 主な機能
 
 - Obsidian標準のDaily Notes設定（保存先、日付形式、テンプレート）を使用
 - ObsidianネイティブMarkdownエディタによる入力
+- デスクトップとモバイルの両方に対応
 - Live Preview／Source modeの切り替え
 - 通常メモとTask Board互換タスクの投稿
 - Scheduled（`⏳`）とDue（`📅`）の日付指定
@@ -53,14 +78,7 @@ Daily Noteへメモやタスクをすばやく追記し、その日のCaptureを
 - **Destination**
   - 挿入先の見出し（未指定の場合はファイル末尾）
 
-## インストール（手動）
-
-1. `npm install`
-2. `npm run build`
-3. ビルドされた`dist/markdown-capture/`をVaultの`.obsidian/plugins/markdown-capture/`へコピー
-4. Obsidianのコミュニティプラグインから **Markdown Capture** を有効化
-
-Obsidian標準のDaily Notesコアプラグインを有効にしてください。
+Markdown Captureを使用するには、Obsidian標準のDaily Notesコアプラグインを有効にしてください。
 
 ## 開発
 
@@ -71,15 +89,42 @@ npm test
 npm run build
 ```
 
-テストでは、Markdown出力、タスク判定、Daily Noteのパス、見出し配下への追記、時刻形式の互換性、タイムライン解析、競合を防ぐ編集処理を検証しています。
+ルートのコマンドは、各workspaceに存在する同名のスクリプトをまとめて実行します。特定のプラグインだけを対象にする場合はworkspaceを指定します。
 
-## 構成
+```bash
+npm run build --workspace @my-obsidian-plugins/capture
+npm run check --workspace @my-obsidian-plugins/capture
+npm run test --workspace @my-obsidian-plugins/capture
+```
+
+ビルド成果物は`dist/<plugin-id>/`へ出力されます。
+
+## リリース方針
+
+プラグインごとに独立してバージョンを管理します。別のプラグインに変更がなければ、そのプラグインのバージョンは更新しません。
+
+Markdown Capture `0.1.1`の例:
+
+```text
+タグ: markdown-capture-v0.1.1
+配布物: markdown-capture-v0.1.1.zip
+展開後: markdown-capture/
+```
+
+配布ZIPには、対象プラグインの`main.js`、`manifest.json`、`styles.css`だけを収録します。
+
+Obsidian公式Community Pluginsへの登録は、リポジトリ直下の`manifest.json`とバージョン番号だけのリリースタグを前提とするため、このmonorepoから直接は行いません。登録する場合は、対象プラグイン専用の公開リポジトリへ同期します。
+
+## ディレクトリ構成
 
 ```text
 dist/
-  markdown-capture/  インストール可能なビルド成果物
+└── <plugin-id>/             インストール可能なビルド成果物
 plugins/
-  capture/
-    src/       実装
-    tests/     仕様テスト
+└── <workspace>/
+    ├── manifest.json        Obsidianプラグイン情報
+    ├── package.json         workspaceとバージョン
+    ├── src/                 実装
+    ├── tests/               テスト
+    └── styles.css           プラグインのスタイル
 ```
