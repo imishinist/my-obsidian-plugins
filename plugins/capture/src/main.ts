@@ -19,6 +19,8 @@ import {
   appendCaptureUnderHeading,
   CaptureEntry,
   CaptureKind,
+  TaskMetadataFormat,
+  TaskPropertyFormat,
   dailyCapturePath,
   formatCaptureLine,
   parseCaptureEntries,
@@ -36,6 +38,9 @@ interface CaptureSettings {
   editorMode: CaptureEditorMode;
   sendButtonLabel: string;
   taskButtonLabel: string;
+  scheduledMarker: string;
+  dueMarker: string;
+  createdMarker: string;
 }
 
 interface CaptureDraftInput {
@@ -51,7 +56,10 @@ const DEFAULT_SETTINGS: CaptureSettings = {
   timeFormat: "HH:mm:ss",
   editorMode: "live-preview",
   sendButtonLabel: "Send",
-  taskButtonLabel: "Task"
+  taskButtonLabel: "Task",
+  scheduledMarker: "⏳",
+  dueMarker: "📅",
+  createdMarker: "➕"
 };
 
 export default class MarkdownCapturePlugin extends Plugin {
@@ -65,7 +73,10 @@ export default class MarkdownCapturePlugin extends Plugin {
       timeFormat: saved?.timeFormat === "HH:mm" ? "HH:mm" : "HH:mm:ss",
       editorMode: saved?.editorMode === "source" ? "source" : "live-preview",
       sendButtonLabel: saved?.sendButtonLabel?.trim() || DEFAULT_SETTINGS.sendButtonLabel,
-      taskButtonLabel: saved?.taskButtonLabel?.trim() || DEFAULT_SETTINGS.taskButtonLabel
+      taskButtonLabel: saved?.taskButtonLabel?.trim() || DEFAULT_SETTINGS.taskButtonLabel,
+      scheduledMarker: saved?.scheduledMarker?.trim() || DEFAULT_SETTINGS.scheduledMarker,
+      dueMarker: saved?.dueMarker?.trim() || DEFAULT_SETTINGS.dueMarker,
+      createdMarker: saved?.createdMarker?.trim() || DEFAULT_SETTINGS.createdMarker
     };
     this.registerView(VIEW_TYPE, (leaf) => new CaptureView(leaf, this));
     this.addCommand({
@@ -96,12 +107,16 @@ export default class MarkdownCapturePlugin extends Plugin {
   async appendCapture(draft: CaptureDraftInput): Promise<void> {
     const capturedAt = new Date();
     const dailyNotes = getDailyNotesSettings(this.app);
+    const taskMetadata = draft.kind === "task" ? getTaskMetadataFormat(this.app, this.settings) : undefined;
+    const created = draft.kind === "task" ? formatIsoDate(capturedAt) : undefined;
     const path = normalizePath(dailyCapturePath(dailyNotes.folder, capturedAt, dailyNotes.format));
     const block = formatCaptureLine({
       ...draft,
       capturedAt,
       headingLevel: this.settings.headingLevel,
-      timeFormat: this.settings.timeFormat
+      timeFormat: this.settings.timeFormat,
+      ...(created ? { created } : {}),
+      ...(taskMetadata ? { taskMetadata } : {})
     });
     await ensureParentFolder(this.app, path);
 
@@ -530,6 +545,13 @@ class CaptureSettingTab extends PluginSettingTab {
           this.plugin.settings.taskButtonLabel = value.trim() || DEFAULT_SETTINGS.taskButtonLabel;
           await this.plugin.saveSettings();
         }));
+    new Setting(this.containerEl).setName("Task metadata").setHeading();
+    new Setting(this.containerEl)
+      .setName("Fallback markers")
+      .setDesc("Task Board's property and date formats are used when available. These markers are used for emoji formats when Task Board cannot be read.");
+    addMarkerSetting(this.containerEl, this.plugin, "Scheduled marker", "scheduledMarker");
+    addMarkerSetting(this.containerEl, this.plugin, "Due marker", "dueMarker");
+    addMarkerSetting(this.containerEl, this.plugin, "Created marker", "createdMarker");
     new Setting(this.containerEl).setName("Destination").setHeading();
     new Setting(this.containerEl)
       .setName("Insert under heading")
@@ -554,9 +576,73 @@ interface AppWithInternalPlugins extends App {
   internalPlugins: {
     getPluginById(id: string): {
       enabled: boolean;
-      instance?: { options?: Partial<DailyNotesSettings> };
+      instance?: {
+        options?: Partial<DailyNotesSettings>;
+        settings?: { data?: { globalSettings?: Partial<TaskBoardGlobalSettings> } };
+      };
     } | null;
   };
+}
+
+interface AppWithCommunityPlugins extends App {
+  plugins?: {
+    getPlugin?(id: string): unknown;
+    plugins?: Record<string, unknown>;
+  };
+}
+
+interface TaskBoardGlobalSettings {
+  taskPropertyFormat: string;
+  dateFormat: string;
+}
+
+interface TaskBoardPlugin {
+  settings?: { data?: { globalSettings?: Partial<TaskBoardGlobalSettings> } };
+}
+
+function getTaskMetadataFormat(app: App, fallback: CaptureSettings): TaskMetadataFormat {
+  const community = (app as AppWithCommunityPlugins).plugins;
+  const taskBoard = (community?.getPlugin?.("task-board")
+    ?? community?.plugins?.["task-board"]
+    ?? (app as AppWithInternalPlugins).internalPlugins?.getPluginById("task-board")?.instance) as TaskBoardPlugin | undefined;
+  const global = taskBoard?.settings?.data?.globalSettings;
+  const format = isTaskPropertyFormat(global?.taskPropertyFormat) ? global.taskPropertyFormat : "2";
+  const taskBoardIsReadable = global !== undefined;
+  return {
+    format,
+    dateFormat: global?.dateFormat?.trim() || "yyyy-MM-dd",
+    scheduledMarker: taskBoardIsReadable ? "⏳" : fallback.scheduledMarker,
+    dueMarker: taskBoardIsReadable ? "📅" : fallback.dueMarker,
+    createdMarker: taskBoardIsReadable ? "➕" : fallback.createdMarker
+  };
+}
+
+function isTaskPropertyFormat(value: string | undefined): value is TaskPropertyFormat {
+  return value === "1" || value === "2" || value === "3" || value === "4";
+}
+
+function formatIsoDate(date: Date): string {
+  return [
+    String(date.getFullYear()).padStart(4, "0"),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0")
+  ].join("-");
+}
+
+function addMarkerSetting(
+  container: HTMLElement,
+  plugin: MarkdownCapturePlugin,
+  name: string,
+  key: "scheduledMarker" | "dueMarker" | "createdMarker"
+): void {
+  new Setting(container)
+    .setName(name)
+    .addText((text) => text
+      .setValue(plugin.settings[key])
+      .onChange(async (value) => {
+        plugin.settings[key] = value.trim() || DEFAULT_SETTINGS[key];
+        await plugin.saveSettings();
+      }));
 }
 
 function getDailyNotesSettings(app: App): DailyNotesSettings {

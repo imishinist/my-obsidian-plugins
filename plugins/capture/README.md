@@ -25,7 +25,8 @@ Obsidian標準のDaily Notesコアプラグインを有効にしてください�
 - デスクトップとモバイルの両方に対応
 - Live Preview／Source modeの切り替え
 - 通常メモとTask Board互換タスクの投稿
-- Scheduled（`⏳`）とDue（`📅`）の日付指定
+- Task Boardのプロパティ形式・日付形式に合わせたCreated、Scheduled、Due
+- タスク作成時のCreated自動付与と、Scheduled／Dueの日付指定
 - `HH:mm`／`HH:mm:ss`の時刻見出し
 - 任意の見出し配下、またはDaily Note末尾への追記
 - 当日のCaptureを新しい順に表示するタイムライン
@@ -49,7 +50,7 @@ Obsidian標準のDaily Notesコアプラグインを有効にしてください�
 ###### 10:20:15
 通常メモ
 ###### 10:21:03
-- [ ] タスク #project/foo ⏳ 2026-09-20 📅 2026-09-30
+- [ ] タスク #project/foo ➕ 2026-09-19 ⏳ 2026-09-20 📅 2026-09-30
 ```
 
 見出しレベルと時刻形式は設定で変更できます。Capture間には余分な空行を追加しません。既存の`HH:mm`形式と`HH:mm:ss`形式は同じDaily Note内で併用できます。
@@ -63,6 +64,9 @@ Obsidian標準のDaily Notesコアプラグインを有効にしてください�
   - Live Preview／Source mode
 - **Buttons**
   - 通常送信ボタンとタスク送信ボタンのラベル
+- **Task metadata**
+  - Task Boardが利用可能な場合は、Task Boardのプロパティ形式（Default／Tasks／Dataview／Obsidian native）と日付形式を自動使用
+  - Task Boardの設定を取得できない場合に使うCreated／Scheduled／Dueの記号
 - **Destination**
   - 挿入先の見出し（未指定の場合はファイル末尾）
 

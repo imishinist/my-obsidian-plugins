@@ -1,4 +1,13 @@
 export type CaptureKind = "note" | "task";
+export type TaskPropertyFormat = "1" | "2" | "3" | "4";
+
+export interface TaskMetadataFormat {
+  format: TaskPropertyFormat;
+  dateFormat: string;
+  scheduledMarker: string;
+  dueMarker: string;
+  createdMarker: string;
+}
 
 export interface CaptureDraft {
   kind: CaptureKind;
@@ -8,6 +17,8 @@ export interface CaptureDraft {
   timeFormat?: "HH:mm" | "HH:mm:ss";
   scheduled?: string;
   due?: string;
+  created?: string;
+  taskMetadata?: TaskMetadataFormat;
 }
 
 export interface CaptureEntry {
@@ -34,11 +45,13 @@ export function formatCaptureLine(draft: CaptureDraft): string {
     return [heading, firstLine, ...remainingLines].join("\n");
   }
 
-  const scheduled = formatDateField("⏳", draft.scheduled);
-  const due = formatDateField("📅", draft.due);
+  const metadata = draft.taskMetadata ?? DEFAULT_TASK_METADATA;
+  const created = formatTaskDateField("created", metadata.createdMarker, draft.created, metadata);
+  const scheduled = formatTaskDateField("scheduled", metadata.scheduledMarker, draft.scheduled, metadata);
+  const due = formatTaskDateField("due", metadata.dueMarker, draft.due, metadata);
   const sourceTask = /^\s*[-+*]\s+\[[^\]]\]\s+/.test(firstLine);
   const task = sourceTask ? firstLine.trim() : `- [ ] ${firstLine.trim()}`;
-  const taskLine = [task, scheduled, due].filter(Boolean).join(" ");
+  const taskLine = [task, created, scheduled, due].filter(Boolean).join(" ");
   return [heading, taskLine, ...remainingLines].join("\n");
 }
 
@@ -154,10 +167,45 @@ function normalizeHeadingLevel(level: number | undefined): number {
   return level;
 }
 
-function formatDateField(marker: string, value: string | undefined): string {
+const DEFAULT_TASK_METADATA: TaskMetadataFormat = {
+  format: "2",
+  dateFormat: "yyyy-MM-dd",
+  scheduledMarker: "⏳",
+  dueMarker: "📅",
+  createdMarker: "➕"
+};
+
+function formatTaskDateField(
+  property: "scheduled" | "due" | "created",
+  marker: string,
+  value: string | undefined,
+  metadata: TaskMetadataFormat
+): string {
   if (!value) return "";
   if (!DATE_PATTERN.test(value)) throw new Error(`Invalid date: ${value}`);
-  return `${marker} ${value}`;
+  const date = formatTaskDate(value, metadata.dateFormat);
+  if (metadata.format === "1") return `${marker}${date}`;
+  if (metadata.format === "3") return `[${property}:: ${date}]`;
+  if (metadata.format === "4") return `@${property}(${date})`;
+  return `${marker} ${date}`;
+}
+
+export function formatTaskDate(isoDate: string, format = "yyyy-MM-dd"): string {
+  if (!DATE_PATTERN.test(isoDate)) throw new Error(`Invalid date: ${isoDate}`);
+  const [year = "", month = "", day = ""] = isoDate.split("-");
+  const tokens: Record<string, string> = {
+    yyyy: year,
+    YYYY: year,
+    yy: year.slice(-2),
+    YY: year.slice(-2),
+    MM: month,
+    M: String(Number(month)),
+    dd: day,
+    DD: day,
+    d: String(Number(day)),
+    D: String(Number(day))
+  };
+  return (format.trim() || "yyyy-MM-dd").replace(/yyyy|YYYY|yy|YY|MM|dd|DD|M|d|D/g, (token) => tokens[token] ?? token);
 }
 
 function escapeRegExp(value: string): string {

@@ -4,6 +4,7 @@ import {
   appendCaptureUnderHeading,
   dailyCapturePath,
   formatCaptureLine,
+  formatTaskDate,
   parseCaptureEntries,
   replaceCaptureEntryInContent,
   resolveCaptureKind
@@ -21,10 +22,34 @@ describe("formatCaptureLine", () => {
     expect(formatCaptureLine({
       kind: "task",
       text: "タスク #project/foo",
+      created: "2026-09-19",
       scheduled: "2026-09-20",
       due: "2026-09-30",
       capturedAt
-    })).toBe("###### 10:21:37\n- [ ] タスク #project/foo ⏳ 2026-09-20 📅 2026-09-30");
+    })).toBe("###### 10:21:37\n- [ ] タスク #project/foo ➕ 2026-09-19 ⏳ 2026-09-20 📅 2026-09-30");
+  });
+
+  it.each([
+    ["1", "C2026/09/19 S2026/09/20 D2026/09/30"],
+    ["2", "C 2026/09/19 S 2026/09/20 D 2026/09/30"],
+    ["3", "[created:: 2026/09/19] [scheduled:: 2026/09/20] [due:: 2026/09/30]"],
+    ["4", "@created(2026/09/19) @scheduled(2026/09/20) @due(2026/09/30)"]
+  ] as const)("supports Task Board property format %s", (format, expected) => {
+    expect(formatCaptureLine({
+      kind: "task",
+      text: "task",
+      created: "2026-09-19",
+      scheduled: "2026-09-20",
+      due: "2026-09-30",
+      capturedAt,
+      taskMetadata: {
+        format,
+        dateFormat: "yyyy/MM/dd",
+        createdMarker: "C",
+        scheduledMarker: "S",
+        dueMarker: "D"
+      }
+    })).toBe(`###### 10:21:37\n- [ ] task ${expected}`);
   });
 
   it("preserves lines after the task title", () => {
@@ -67,6 +92,13 @@ describe("formatCaptureLine", () => {
   it("rejects empty capture text", () => {
     expect(() => formatCaptureLine({ kind: "note", text: "\n  \n", capturedAt }))
       .toThrow("Capture text is required");
+  });
+});
+
+describe("formatTaskDate", () => {
+  it("uses Task Board-style date format tokens", () => {
+    expect(formatTaskDate("2026-09-09", "dd/MM/yyyy")).toBe("09/09/2026");
+    expect(formatTaskDate("2026-09-09", "M/d/yy")).toBe("9/9/26");
   });
 });
 
