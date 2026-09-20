@@ -51,8 +51,14 @@
   border: 1px solid var(--background-modifier-border);
   border-radius: 10px;
   box-sizing: border-box;
+  display: inline-block;
+  line-height: 1.5;
+  max-height: min(18rem, 40dvh);
   min-height: 7.5rem;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  resize: none;
+  white-space: pre-wrap;
   width: 100%;
   cursor: text;
 }
@@ -62,9 +68,10 @@
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--interactive-accent) 22%, transparent);
 }
 
-.markdown-capture-input .cm-editor {
+.markdown-capture-input .markdown-source-view.mod-cm6 .cm-editor {
   cursor: text;
-  min-height: 7.5rem;
+  height: 100%;
+  min-height: fit-content;
 }
 
 .markdown-capture-input .cm-editor.cm-focused {
@@ -73,17 +80,21 @@
 
 .markdown-capture-input .cm-scroller {
   cursor: text;
-  max-height: 18rem;
-  overflow: auto;
 }
 
-.markdown-capture-input .cm-content {
-  min-height: 7.5rem;
+.markdown-capture-input .markdown-source-view.mod-cm6 .cm-content {
   padding: 0.75rem 1rem 1rem !important;
 }
 
 .markdown-capture-input .cm-line {
   padding-inline: 0;
+}
+
+/* Obsidian adds full-page editor spacing on phones. This is an embedded editor,
+   so keep its first line at the top of the capture field, as Thino does. */
+.is-phone .mod-root .workspace-leaf-content .view-content
+  .markdown-capture-input .markdown-source-view > .cm-editor > .cm-scroller {
+  padding-top: unset;
 }
 
 .markdown-capture-task-options {
